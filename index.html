@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读理解分析 - 投票小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .question {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .options-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-section {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .option-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+        
+        .option-card:active {
+            transform: scale(0.98);
+        }
+        
+        .option-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .option-text {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .votes-count {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .reset-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background: #c0392b;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px 10px;
+            border-bottom: 2px solid #2c3e50;
+            border-left: 2px solid #2c3e50;
+        }
+        
+        .chart-y-axis {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .chart-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+        
+        .bar {
+            width: 50px;
+            background: linear-gradient(to top, #3498db, #2980b9);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s ease;
+            margin-bottom: 10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .bar-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>阅读理解分析工具</h1>
+            <p class="description">分析第一段如何引入话题并吸引读者的兴趣</p>
+        </header>
+        
+        <div class="question">How does para 1 introduce the topic and interest readers?</div>
+        
+        <div class="content">
+            <section class="options-section">
+                <h2>选择你的答案</h2>
+                <div class="options-grid" id="optionsGrid">
+                    <!-- 选项将通过JavaScript动态生成 -->
+                </div>
+                <button class="reset-btn" id="resetBtn">重置投票</button>
+                
+                <div class="instructions">
+                    <h3>使用说明</h3>
+                    <p>点击上面的选项进行投票。每次投票将在右侧柱状图中增加1厘米高度。您可以通过"重置投票"按钮清除所有投票数据。</p>
+                </div>
+            </section>
+            
+            <section class="chart-section">
+                <h2>投票结果</h2>
+                <div class="chart-container" id="chartContainer">
+                    <div class="chart-y-axis" id="chartYAxis">
+                        <!-- Y轴刻度将通过JavaScript动态生成 -->
+                    </div>
+                    <!-- 柱状图将通过JavaScript动态生成 -->
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>阅读理解投票小程序 - 离线使用</p>
+        </footer>
+    </div>
+
+    <script>
+        // 选项数据
+        const options = [
+            { id: 'A', text: 'tell a story' },
+            { id: 'B', text: 'ask a question' },
+            { id: 'C', text: 'use numbers' },
+            { id: 'D', text: 'describe a scene' }
+        ];
+
+        // 从本地存储获取投票数据或初始化
+        let votes = JSON.parse(localStorage.getItem('readingVotes')) || {};
+        
+        // 初始化投票数据
+        options.forEach(option => {
+            if (!votes[option.id]) {
+                votes[option.id] = 0;
+            }
+        });
+
+        // 保存投票数据到本地存储
+        function saveVotes() {
+            localStorage.setItem('readingVotes', JSON.stringify(votes));
+        }
+
+        // 渲染选项卡片
+        function renderOptionCards() {
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.innerHTML = `
+                    <div class="option-letter">${option.id}</div>
+                    <div>
+                        <div class="option-text">${option.text}</div>
+                        <div class="votes-count">票数: <span id="count-${option.id}">${votes[option.id]}</span></div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    votes[option.id]++;
+                    document.getElementById(`count-${option.id}`).textContent = votes[option.id];
+                    updateChart();
+                    saveVotes();
+                });
+                
+                optionsGrid.appendChild(card);
+            });
+        }
+
+        // 初始化图表
+        function initChart() {
+            const chartContainer = document.getElementById('chartContainer');
+            const chartYAxis = document.getElementById('chartYAxis');
+            
+            // 清空现有内容
+            chartYAxis.innerHTML = '';
+            
+            // 移除现有的柱状图
+            document.querySelectorAll('.chart-bar').forEach(el => el.remove());
+            
+            // 设置Y轴刻度
+            const maxVotes = Math.max(...Object.values(votes));
+            const maxHeight = Math.max(maxVotes, 10); // 至少10票的高度
+            
+            for (let i = maxHeight; i >= 0; i--) {
+                const tick = document.createElement('div');
+                tick.textContent = i;
+                chartYAxis.appendChild(tick);
+            }
+            
+            // 创建柱状图
+            options.forEach(option => {
+                const chartBar = document.createElement('div');
+                chartBar.className = 'chart-bar';
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                
+                // 设置柱状图高度 - 每票对应1厘米
+                // 注意：在网页中，1cm ≈ 37.8px，但不同设备可能有所不同
+                const barHeight = votes[option.id] * 37.8; // 1票 = 1cm ≈ 37.8px
+                bar.style.height = `${barHeight}px`;
+                
+                const barValue = document.createElement('div');
+                barValue.className = 'bar-value';
+                barValue.textContent = votes[option.id];
+                bar.appendChild(barValue);
+                
+                const barLabel = document.createElement('div');
+                barLabel.className = 'bar-label';
+                barLabel.textContent = option.id;
+                
+                chartBar.appendChild(bar);
+                chartBar.appendChild(barLabel);
+                chartContainer.appendChild(chartBar);
+            });
+        }
+
+        // 更新图表数据
+        function updateChart() {
+            const bars = document.querySelectorAll('.bar');
+            const barValues = document.querySelectorAll('.bar-value');
+            
+            options.forEach((option, index) => {
+                const barHeight = votes[option.id] * 37.8; // 1票 = 1cm ≈ 37.8px
+                bars[index].style.height = `${barHeight}px`;
+                barValues[index].textContent = votes[option.id];
+            });
+        }
+
+        // 重置投票
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('确定要重置所有投票吗？')) {
+                options.forEach(option => {
+                    votes[option.id] = 0;
+                });
+                saveVotes();
+                renderOptionCards();
+                initChart();
+            }
+        });
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOptionCards();
+            initChart();
+        });
+    </script>
+</body>
+</html>
